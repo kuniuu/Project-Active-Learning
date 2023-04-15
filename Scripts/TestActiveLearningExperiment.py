@@ -39,8 +39,8 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
     y_train_new = y_train[training_indices]
 
     # podzbior do pool'ingu
-    X_pool = numpy.delete(X_raw, training_indices, axis=0)
-    y_pool = numpy.delete(y_raw, training_indices, axis=0)
+    X_pool = numpy.delete(X_train, training_indices, axis=0)
+    y_pool = numpy.delete(y_train, training_indices, axis=0)
 
     # inicjalizacja learnera
     learner = ActiveLearner(
@@ -64,11 +64,13 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
     ax.scatter(X_test[:, 0][is_correct], X_test[:, 1][is_correct], c='g', marker='+', label='Correct', alpha=8/10)
     ax.scatter(X_test[:, 0][~is_correct], X_test[:, 1][~is_correct], c='r', marker='x', label='Incorrect', alpha=8/10)
     ax.legend(loc='lower right')
-    ax.set_title('ActiveLearner class prediction without pooling (Accuracy: {score:.3f})'.format(score=unqueried_score))
+    ax.set_title('ActiveLearner class prediction without pooling in repeat {i} (Accuracy: {score:.3f})'.format(
+        i=i + 1, score=unqueried_score))
     plt.show()
 
-    #
-    budget = 20
+    # set up budget
+    budget = round(0.3 * X_pool.shape[0])
+    print('Budget: ', budget)
     performance_history = [unqueried_score]
 
     for index in range(budget):
@@ -99,8 +101,8 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
     ax.scatter(X_test[:, 0][is_correct], X_test[:, 1][is_correct], c='g', marker='+', label='Correct', alpha=8 / 10)
     ax.scatter(X_test[:, 0][~is_correct], X_test[:, 1][~is_correct], c='r', marker='x', label='Incorrect', alpha=8 / 10)
     ax.legend(loc='lower right')
-    ax.set_title('ActiveLearner class prediction after {n} queries (Accuracy: {final_acc:.3f})'.format(
-        n=budget, final_acc=performance_history[-1]))
+    ax.set_title('ActiveLearner class prediction after {n} queries in repeat {i} (Accuracy: {final_acc:.3f})'.format(
+        n=budget, i=i + 1, final_acc=performance_history[-1]))
     plt.show()
 
 print("\nUnqueried vector data")
