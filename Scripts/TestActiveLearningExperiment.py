@@ -6,6 +6,7 @@ from modAL.models import ActiveLearner
 from modAL.uncertainty import uncertainty_sampling
 from sklearn.naive_bayes import GaussianNB
 
+# Define a synthetic dataset of 400 samples with 2 informative features and 2 classes (binary problem)
 X_raw, y_raw = make_classification(
     n_samples=400,
     n_features=2,
@@ -16,33 +17,38 @@ X_raw, y_raw = make_classification(
     flip_y=0.08
 )
 
+# Plot raw dataset
 plt.figure(figsize=(8.5, 6), dpi=130)
 plt.scatter(X_raw[:, 0], X_raw[:, 1], c=y_raw)
 plt.title('Raw dataset')
 plt.show()
 
+# Define RepeatedStratifiedKFold with 2 splits and 5 repeats
 rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5)
-unqueried_vector = []
+
+# Define vectors for accuracy scores - noqueried (no pooling) and queried (pooling)
+noqueried_vector = []
 queried_vector = []
 
+# Create a RepeatedStratifiedKFold loop
 for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
-    # wydzielenie pierwotnego zbioru treningowego i testowego przez walidację krzyżową
+    # Define train and test sets
     X_train, X_test = X_raw[train_index], X_raw[test_index]
     y_train, y_test = y_raw[train_index], y_raw[test_index]
 
-    # wydzielenie podzbioru uczącego i podzbioru do pool'ingu z pierwotnego zbioru treningowego
+    # Find 5 random indexes for new ground true train subset
     n_labeled_examples = X_train.shape[0]
     training_indices = numpy.random.randint(low=0, high=n_labeled_examples, size=5)
 
-    # podzbior uczacy
+    # From train set, create a new ground true train subset
     X_train_new = X_train[training_indices]
     y_train_new = y_train[training_indices]
 
-    # podzbior do pool'ingu
+    # From train set, create a new pooling subset
     X_pool = numpy.delete(X_train, training_indices, axis=0)
     y_pool = numpy.delete(y_train, training_indices, axis=0)
 
-    # inicjalizacja learnera
+    # Learner initialization with ground true train subset, Gaussian Naive-Bayes estimator and Least of Confidence sampling method
     learner = ActiveLearner(
         estimator=GaussianNB(),
         query_strategy=uncertainty_sampling,
@@ -50,16 +56,16 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
         y_training=y_train_new
     )
 
-    # warunek logiczny do scatterowania
+    # Make a prediction and check if it was correct (for scatter purposes only)
     predictions = learner.predict(X_test)
     is_correct = (predictions == y_test)
 
-    # robimy predykcje i sprawdzamy accuracy naszego modelu bez pool'owania
+    # Calculate and report our model's accuracy, then append it to the noqueried_vector
     unqueried_score = learner.score(X_test, y_test)
     print('\nAccuracy before queries in repeat {i}: {acc:0.4f}'.format(i=i + 1, acc=unqueried_score))
-    unqueried_vector.append(unqueried_score)
+    noqueried_vector.append(unqueried_score)
 
-    # scatterujemy predykcje klas bez pool'ingu
+    # Scatter no-pooling classification
     fig, ax = plt.subplots(figsize=(8.5, 6), dpi=130)
     ax.scatter(X_test[:, 0][is_correct], X_test[:, 1][is_correct], c='g', marker='+', label='Correct', alpha=8/10)
     ax.scatter(X_test[:, 0][~is_correct], X_test[:, 1][~is_correct], c='r', marker='x', label='Incorrect', alpha=8/10)
@@ -68,35 +74,38 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
         i=i + 1, score=unqueried_score))
     plt.show()
 
-    # set up budget
+    # Set up a budget (30% of pooling subset)
     budget = round(0.3 * X_pool.shape[0])
     print('Budget: ', budget)
     performance_history = [unqueried_score]
 
+    # Create a ActiveLearning loop
     for index in range(budget):
+        # Query a pooling subset
         query_index, query_instance = learner.query(X_pool)
 
         # Teach our ActiveLearner model the record it has requested.
         X, y = X_pool[query_index], y_pool[query_index]
         learner.teach(X=X, y=y)
 
-        # Remove the queried instance from the unlabeled pool.
+        # Remove the queried instance from the unlabeled pooling subset.
         X_pool, y_pool = numpy.delete(X_pool, query_index, axis=0), numpy.delete(y_pool, query_index)
 
         # Calculate and report our model's accuracy.
-        queried_score = learner.score(X_raw, y_raw)
+        queried_score = learner.score(X_test, y_test)
         print('Accuracy after query {n} in repeat {i}: {acc:0.4f}'.format(n=index + 1, i=i + 1, acc=queried_score))
 
         # Save our model's performance for plotting.
         performance_history.append(queried_score)
 
+    # Append last model's performance instance to the queried_vector
     queried_vector.append(performance_history[-1])
 
-    # aktualizacja warunku logicznego do scatterowania
+    # Make a prediction and check if it was correct (for scatter purposes only)
     predictions = learner.predict(X_test)
     is_correct = (predictions == y_test)
 
-    # scatterujemy predykcje klas po pool'ingu
+    # Scatter after-pooling classification
     fig, ax = plt.subplots(figsize=(8.5, 6), dpi=130)
     ax.scatter(X_test[:, 0][is_correct], X_test[:, 1][is_correct], c='g', marker='+', label='Correct', alpha=8 / 10)
     ax.scatter(X_test[:, 0][~is_correct], X_test[:, 1][~is_correct], c='r', marker='x', label='Incorrect', alpha=8 / 10)
@@ -105,10 +114,12 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
         n=budget, i=i + 1, final_acc=performance_history[-1]))
     plt.show()
 
+# Print mean and std of no-pooling accuracy scores
 print("\nUnqueried vector data")
-print("Mean ", round(numpy.average(unqueried_vector), 3))
-print("Std ", round(numpy.std(unqueried_vector), 3))
+print("Mean ", round(numpy.average(noqueried_vector), 3))
+print("Std ", round(numpy.std(noqueried_vector), 3))
 
+# Print mean and std of after-pooling accuracy scores
 print("\nQueried vector data")
 print("Mean ", round(numpy.average(queried_vector), 3))
 print("Std ", round(numpy.std(queried_vector), 3))
