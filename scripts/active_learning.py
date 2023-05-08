@@ -1,10 +1,15 @@
 import numpy
+
 from matplotlib import pyplot as plt
+
 from sklearn.datasets import make_classification
 from sklearn.model_selection import RepeatedStratifiedKFold
-from modAL.models import ActiveLearner
-from modAL.uncertainty import uncertainty_sampling
 from sklearn.naive_bayes import GaussianNB
+
+from modAL.models import ActiveLearner
+
+# Our own least_confidence method
+from methods.my_least_confidence import least_confidence_sampling
 
 # Define a synthetic dataset of 400 samples with 2 informative features and 2 classes (binary problem)
 X_raw, y_raw = make_classification(
@@ -51,7 +56,7 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
     # Learner initialization with ground true train subset, Gaussian Naive-Bayes estimator and Least of Confidence sampling method
     learner = ActiveLearner(
         estimator=GaussianNB(),
-        query_strategy=uncertainty_sampling,
+        query_strategy=least_confidence_sampling,
         X_training=X_train_new,
         y_training=y_train_new
     )
