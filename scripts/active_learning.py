@@ -120,7 +120,7 @@ def run_active_learning(choices):
     print("Std ", round(numpy.std(queried_vector), 3))
 
     # Plot accuracy history
-    plot_accuracy(accuracy_history)
+    plot_accuracy(accuracy_history, choices)
     plt.show()
 
 

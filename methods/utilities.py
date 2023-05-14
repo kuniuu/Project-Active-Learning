@@ -22,16 +22,18 @@ def __scatter_scores(X_test, is_correct: bool, ax):
     ax.legend(loc='lower right')
 
 
-def plot_accuracy(accuracy_history):
+def plot_accuracy(accuracy_history, choices):
 
-    fig, ((ax1, ax2, ax3, ax4, ax5), (ax6, ax7, ax8, ax9, ax10)) = plt.subplots(2, 5, figsize=(45, 20), dpi=130)
-    fig.suptitle('Accuracy History')
+    fig, ((ax1, ax2, ax3, ax4, ax5), (ax6, ax7, ax8, ax9, ax10)) = plt.subplots(2, 5, figsize=(60, 25), dpi=130)
+    fig.subplots_adjust(wspace=0.4, hspace=0.4, top=0.85)
+    fig.suptitle(f"Accuracy History\n{choices['estimator']}\n{choices['dataset']}")
 
     for i, arr in enumerate(accuracy_history):
             x = range(len(arr))
             y = arr
             ax = eval(f"ax{i + 1}") # TODO look for different way or not
             __scatter_accuracy(x, y, ax)
+            ax.set_title(f"Fold {i + 1}")
 
 
 def __scatter_accuracy(x, y, ax):
