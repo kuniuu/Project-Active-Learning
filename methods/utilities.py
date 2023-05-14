@@ -20,3 +20,23 @@ def __scatter_scores(X_test, is_correct: bool, ax):
     ax.scatter(X_test[:, 0][is_correct], X_test[:, 1][is_correct], c='g', marker='+', label='Correct', alpha=8 / 10)
     ax.scatter(X_test[:, 0][~is_correct], X_test[:, 1][~is_correct], c='r', marker='x', label='Incorrect', alpha=8 / 10)
     ax.legend(loc='lower right')
+
+
+def plot_accuracy(accuracy_history):
+
+    fig, ((ax1, ax2, ax3, ax4, ax5), (ax6, ax7, ax8, ax9, ax10)) = plt.subplots(2, 5, figsize=(45, 20), dpi=130)
+    fig.suptitle('Accuracy History')
+
+    for i, arr in enumerate(accuracy_history):
+            x = range(len(arr))
+            y = arr
+            ax = eval(f"ax{i + 1}") # TODO look for different way or not
+            __scatter_accuracy(x, y, ax)
+
+
+def __scatter_accuracy(x, y, ax):
+
+    ax.plot(x, y)
+    ax.set_xlabel('Query')
+    ax.set_ylabel('Accuracy')
+    print(y)
