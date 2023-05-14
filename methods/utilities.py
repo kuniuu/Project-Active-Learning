@@ -3,7 +3,7 @@ from matplotlib import pyplot as plt
 
 def plot_scores(X_test, iteration, before_is_correct: bool, after_is_correct: bool, before_queries_score_source, after_queries_score_source, budget):
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.5, 6), dpi=130)
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8.5, 10), dpi=130)
 
     __scatter_scores(X_test, before_is_correct, ax1)
     ax1.set_title(
@@ -39,4 +39,3 @@ def __scatter_accuracy(x, y, ax):
     ax.plot(x, y)
     ax.set_xlabel('Query')
     ax.set_ylabel('Accuracy')
-    print(y)
