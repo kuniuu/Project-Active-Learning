@@ -1,8 +1,9 @@
 import os
 
+import numpy as np
 from sklearn.datasets import make_classification
 import pandas as pd
-from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.feature_selection import SelectKBest, chi2, f_classif
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
@@ -44,11 +45,18 @@ def __use_real_dataset():
     # Encode the categorical features
     X = pd.get_dummies(X, dtype=int)
 
+    # Retrieve all features names
+    X_columns_names = X.columns.tolist()
+
     # Impute the missing values
     X = imputer.fit_transform(X)
 
     # Select k best features
-    X_new = SelectKBest(chi2, k=500).fit_transform(X=X, y=y)
+    selector = SelectKBest(score_func=f_classif, k=10) # TODO: ask if k=10 is ok
+    X_new = selector.fit_transform(X=X, y=y)
+
+    # Save selected feature names to .npy file
+    np.save('selected_features.npy', np.array(X_columns_names)[selector.get_support()])
 
     # Encode the labels
     y = encoder.fit_transform(y)

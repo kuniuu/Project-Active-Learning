@@ -1,7 +1,9 @@
-import numpy
+import math
+
+import numpy as np
 from matplotlib import pyplot as plt
 from modAL.models import ActiveLearner
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import RepeatedStratifiedKFold
 
 from datasets.dataset_creator import choose_dataset
@@ -13,7 +15,7 @@ from methods.utilities import plot_scores, plot_accuracy
 
 # Define random state
 RANDOM_STATE = 2137
-numpy.random.seed(RANDOM_STATE)
+np.random.seed(RANDOM_STATE)
 
 
 def run_active_learning(choices):
@@ -21,9 +23,9 @@ def run_active_learning(choices):
     X_raw, y_raw = choose_dataset(choices['dataset'], RANDOM_STATE)
 
     # Plot raw dataset
-    plt.figure(figsize=(8.5, 6), dpi=130)
-    plt.scatter(X_raw[:, 0], X_raw[:, 1], c=y_raw)
-    plt.title('Raw dataset')
+    # plt.figure(figsize=(8.5, 6), dpi=130)
+    # plt.scatter(X_raw[:, 0], X_raw[:, 1], c=y_raw)
+    # plt.title('Raw dataset')
 
     # Define RepeatedStratifiedKFold with 2 splits and 5 repeats
     rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5, random_state=RANDOM_STATE)
@@ -43,15 +45,15 @@ def run_active_learning(choices):
 
         # Find 5 random indexes for new ground true train subset
         n_labeled_examples = X_train.shape[0]
-        training_indices = numpy.random.randint(low=0, high=n_labeled_examples, size=50)
+        training_indices = np.random.randint(low=0, high=n_labeled_examples, size=50)
 
         # From train set, create a new ground true train subset
         X_train_new = X_train[training_indices]
         y_train_new = y_train[training_indices]
 
         # From train set, create a new pooling subset
-        X_pool = numpy.delete(X_train, training_indices, axis=0)
-        y_pool = numpy.delete(y_train, training_indices, axis=0)
+        X_pool = np.delete(X_train, training_indices, axis=0)
+        y_pool = np.delete(y_train, training_indices, axis=0)
 
         # Learner initialization with ground true train subset and Least of Confidence sampling method
         learner = ActiveLearner(
@@ -67,7 +69,7 @@ def run_active_learning(choices):
 
         # Calculate and report our model's accuracy, then append it to the noqueried_vector
         unqueried_score = accuracy_score(y_test, predictions)
-        print('\nAccuracy before queries in repeat {i}: {acc:0.4f}'.format(i=i + 1, acc=unqueried_score))
+        print('Stats for fold {i}:\n- Accuracy before queries: {acc:0.4f}'.format(i=i + 1, acc=unqueried_score))
         noqueried_vector.append(unqueried_score)
 
         # Set up a budget (30% of pooling subset)
@@ -85,7 +87,7 @@ def run_active_learning(choices):
             learner.teach(X=X, y=y)
 
             # Remove the queried instance from the unlabeled pooling subset.
-            X_pool, y_pool = numpy.delete(X_pool, query_index, axis=0), numpy.delete(y_pool, query_index)
+            X_pool, y_pool = np.delete(X_pool, query_index, axis=0), np.delete(y_pool, query_index)
 
             # Predict and calculate model's accuracy.
             queried_score = learner.score(X_test, y_test)
@@ -96,7 +98,7 @@ def run_active_learning(choices):
         accuracy_history.append(performance_history)
 
         print(
-            'Accuracy after query {n} in repeat {i}: {acc:0.4f}'.format(n=budget, i=i + 1, acc=performance_history[-1]))
+            '- Accuracy after query {n}: {acc:0.4f}'.format(n=budget, acc=performance_history[-1]))
 
         # Append last model's performance instance to the queried_vector
         queried_vector.append(performance_history[-1])
@@ -105,6 +107,8 @@ def run_active_learning(choices):
         predictions = learner.predict(X_test)
         after_is_correct = (predictions == y_test)
 
+        print("- Classification report:\n" + classification_report(y_test, predictions))
+
         # Scatter after-pooling classification
         if __get_want_plots(choices, 'plots'):
             plot_scores(X_test, i, before_is_correct, after_is_correct, unqueried_score, performance_history[-1],
@@ -112,12 +116,16 @@ def run_active_learning(choices):
 
     # Print mean and std of no-pooling accuracy scores
     print("\nUnqueried vector data")
-    print("Mean ", round(numpy.average(noqueried_vector), 3))
-    print("Std ", round(numpy.std(noqueried_vector), 3))
+    print("Mean ", round(np.average(noqueried_vector), 3))
+    print("Std ", round(np.std(noqueried_vector), 3))
+
     # Print mean and std of after-pooling accuracy scores
     print("\nQueried vector data")
-    print("Mean ", round(numpy.average(queried_vector), 3))
-    print("Std ", round(numpy.std(queried_vector), 3))
+    print("Mean ", round(np.average(queried_vector), 3))
+    print("Std ", round(np.std(queried_vector), 3))
+
+    np.save('queried_vector_data.npy', queried_vector)
+    np.save('no_queried_vector_data.npy', noqueried_vector)
 
     # Plot accuracy history
     plot_accuracy(accuracy_history, choices)
@@ -133,7 +141,6 @@ def __get_n_neighbours(d, key, default=3):
 
 def __get_want_plots(d, key, default=False):
     try:
-        print(bool(d[key]))
         return bool(d[key])
     except KeyError:
         return default
