@@ -11,7 +11,7 @@ from modAL.models import ActiveLearner
 
 # Our own least_confidence method
 from methods.my_least_confidence import least_confidence_sampling
-from methods.utilities import plot_scores
+from methods.utilities import plot_scores, plot_accuracy
 from datasets.artificial_dataset import create_dataset
 
 # Define random state
@@ -32,6 +32,8 @@ rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5)
 # Define vectors for accuracy scores - noqueried (no pooling) and queried (pooling)
 noqueried_vector = []
 queried_vector = []
+# Define a list for accuracy history of each fold
+accuracy_history = []
 
 # Create a RepeatedStratifiedKFold loop
 for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
@@ -73,6 +75,8 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
     # print('Budget: ', budget)
     performance_history = [unqueried_score]
 
+
+
     # Create a ActiveLearning loop
     for index in range(budget):
         # Query a pooling subset
@@ -90,6 +94,10 @@ for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
 
         # Save our model's performance for plotting.
         performance_history.append(queried_score)
+
+
+    accuracy_history.append(performance_history)
+
 
     print('Accuracy after query {n} in repeat {i}: {acc:0.4f}'.format(n=budget, i=i + 1, acc=performance_history[-1]))
 
@@ -115,3 +123,7 @@ print("Std ", round(numpy.std(noqueried_vector), 3))
 print("\nQueried vector data")
 print("Mean ", round(numpy.average(queried_vector), 3))
 print("Std ", round(numpy.std(queried_vector), 3))
+
+# Chart for accuracy growth
+plot_accuracy(accuracy_history)
+plt.show()
