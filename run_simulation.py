@@ -1,6 +1,8 @@
-import inquirer
 import re
 
+import inquirer
+
+from methods.utilities import set_seed
 from scripts.active_learning import run_active_learning
 
 questions = [
@@ -34,5 +36,7 @@ print("Choice of estimator: " + choices['estimator'])
 print("Choice of dataset: " + choices['dataset'])
 if choices['estimator'] == 'kNearestNeighbours':
     print("Choice of n_neighbors: " + choices['n_neighbors'])
+
+set_seed(2137)
 
 run_active_learning(choices)

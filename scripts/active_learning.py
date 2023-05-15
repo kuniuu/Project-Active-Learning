@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 from matplotlib import pyplot as plt
 from modAL.models import ActiveLearner
@@ -8,19 +6,14 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 
 from datasets.dataset_creator import choose_dataset
 from methods.estimators import choose_estimator
-
 # Our own least_confidence method
 from methods.my_least_confidence import least_confidence_sampling
-from methods.utilities import plot_scores, plot_accuracy
-
-# Define random state
-RANDOM_STATE = 2137
-np.random.seed(RANDOM_STATE)
+from methods.utilities import plot_scores, plot_accuracy, get_seed
 
 
 def run_active_learning(choices):
     # Choose a dataset
-    X_raw, y_raw = choose_dataset(choices['dataset'], RANDOM_STATE)
+    X_raw, y_raw = choose_dataset(choices['dataset'], get_seed())
 
     # Plot raw dataset
     # plt.figure(figsize=(8.5, 6), dpi=130)
@@ -28,7 +21,7 @@ def run_active_learning(choices):
     # plt.title('Raw dataset')
 
     # Define RepeatedStratifiedKFold with 2 splits and 5 repeats
-    rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5, random_state=RANDOM_STATE)
+    rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5, random_state=get_seed())
 
     # Define vectors for accuracy scores - noqueried (no pooling) and queried (pooling)
     noqueried_vector = []
