@@ -1,4 +1,5 @@
 import os
+import pathlib
 
 import numpy as np
 from sklearn.datasets import make_classification
@@ -35,11 +36,11 @@ def __use_real_dataset():
     imputer = SimpleImputer(strategy='mean')
 
     cwd = os.getcwd()
-    # Load the data
-    data = pd.read_csv(cwd + '\\datasets\\titanic.csv')
+    path = pathlib.Path(cwd + '\\datasets\\titanic.csv')
+    data = pd.read_csv(path)
 
     # Drop the non-important features and labels
-    X = data.drop(['Survived', 'PassengerId'], axis=1)
+    X = data.drop(['Survived', 'PassengerId', 'Name'], axis=1)
     y = data['Survived']
 
     # Encode the categorical features
@@ -52,7 +53,7 @@ def __use_real_dataset():
     X = imputer.fit_transform(X)
 
     # Select k best features
-    selector = SelectKBest(score_func=f_classif, k=10) # TODO: ask if k=10 is ok
+    selector = SelectKBest(score_func=f_classif, k=10)
     X_new = selector.fit_transform(X=X, y=y)
 
     # Save selected feature names to .npy file
