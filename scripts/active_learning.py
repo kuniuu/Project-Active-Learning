@@ -1,5 +1,3 @@
-import math
-
 import numpy as np
 from matplotlib import pyplot as plt
 from modAL.models import ActiveLearner
@@ -8,7 +6,6 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 
 from datasets.dataset_creator import choose_dataset
 from methods.estimators import choose_estimator
-
 # Our own least_confidence method
 from methods.my_least_confidence import least_confidence_sampling
 from methods.utilities import plot_scores, plot_accuracy, get_seed

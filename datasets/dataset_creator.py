@@ -2,11 +2,11 @@ import os
 import pathlib
 
 import numpy as np
-from sklearn.datasets import make_classification
 import pandas as pd
-from sklearn.feature_selection import SelectKBest, chi2, f_classif
+from sklearn.datasets import make_classification
+from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder
 
 
 def choose_dataset(choice, random_state: int):
@@ -35,6 +35,7 @@ def __use_real_dataset():
     encoder = LabelEncoder()
     imputer = SimpleImputer(strategy='mean')
 
+    # Load external dataset
     cwd = os.getcwd()
     path = pathlib.Path(cwd + '\\datasets\\titanic.csv')
     data = pd.read_csv(path)
