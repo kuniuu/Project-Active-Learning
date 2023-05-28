@@ -1,3 +1,4 @@
 .idea
 *.npy
 __pycache__/
+/saved_numpy_files/

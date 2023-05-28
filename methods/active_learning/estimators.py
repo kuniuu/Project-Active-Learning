@@ -4,9 +4,9 @@ from sklearn.tree import DecisionTreeClassifier
 
 
 def choose_estimator(choice, n_neighbors):
-    if choice is "GaussianNB":
+    if choice == "GaussianNB":
         estimator = GaussianNB()
-    elif choice is "kNearestNeighbours":
+    elif choice == "kNearestNeighbours":
         estimator = KNeighborsClassifier(n_neighbors=n_neighbors)
     else:
         estimator = DecisionTreeClassifier()

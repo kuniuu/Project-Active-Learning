@@ -1,3 +1,6 @@
+import os
+import pathlib
+
 import numpy as np
 from matplotlib import pyplot as plt
 from modAL.models import ActiveLearner
@@ -5,10 +8,11 @@ from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import RepeatedStratifiedKFold
 
 from datasets.dataset_creator import choose_dataset
-from methods.estimators import choose_estimator
+from methods.active_learning.estimators import choose_estimator
 # Our own least_confidence method
-from methods.my_least_confidence import least_confidence_sampling
-from methods.utilities import plot_scores, plot_accuracy, get_seed
+from methods.active_learning.my_least_confidence import least_confidence_sampling
+from methods.statistical_tests.t_test import t_test
+from methods.utils import plot_scores, plot_accuracy, get_seed, print_mean_and_std
 
 
 def run_active_learning(choices):
@@ -23,9 +27,9 @@ def run_active_learning(choices):
     # Define RepeatedStratifiedKFold with 2 splits and 5 repeats
     rskf = RepeatedStratifiedKFold(n_splits=2, n_repeats=5, random_state=get_seed())
 
-    # Define vectors for accuracy scores - noqueried (no pooling) and queried (pooling)
-    noqueried_vector = []
-    queried_vector = []
+    # Define vectors for accuracy scores - before_queries (no pooling) and after_queries (pooling)
+    before_queries_scores_vector = []
+    after_queries_scores_vector = []
 
     # Define a list for accuracy history of each fold
     accuracy_history = []
@@ -60,15 +64,15 @@ def run_active_learning(choices):
         predictions = learner.predict(X_test)
         before_is_correct = (predictions == y_test)
 
-        # Calculate and report our model's accuracy, then append it to the noqueried_vector
-        unqueried_score = accuracy_score(y_test, predictions)
-        print('Stats for fold {i}:\n- Accuracy before queries: {acc:0.4f}'.format(i=i + 1, acc=unqueried_score))
-        noqueried_vector.append(unqueried_score)
+        # Calculate and report our model's accuracy, then append it to the before_queries_scores_vector
+        before_queries_score = accuracy_score(y_test, predictions)
+        print('Stats for fold {i}:\n- Accuracy before queries: {acc:0.4f}'.format(i=i + 1, acc=before_queries_score))
+        before_queries_scores_vector.append(before_queries_score)
 
         # Set up a budget (30% of pooling subset)
         budget = round(0.3 * X_pool.shape[0])
         # print('Budget: ', budget)
-        performance_history = [unqueried_score]
+        performance_history = [before_queries_score]
 
         # Create a ActiveLearning loop
         for index in range(budget):
@@ -93,8 +97,8 @@ def run_active_learning(choices):
         print(
             '- Accuracy after query {n}: {acc:0.4f}'.format(n=budget, acc=performance_history[-1]))
 
-        # Append last model's performance instance to the queried_vector
-        queried_vector.append(performance_history[-1])
+        # Append last model's performance instance to the after_queries_scores_vector
+        after_queries_scores_vector.append(performance_history[-1])
 
         # Make a prediction and check if it was correct (for scatter purposes only)
         predictions = learner.predict(X_test)
@@ -104,26 +108,23 @@ def run_active_learning(choices):
 
         # Scatter after-pooling classification
         if __get_want_plots(choices, 'plots'):
-            plot_scores(X_test, i, before_is_correct, after_is_correct, unqueried_score, performance_history[-1],
+            plot_scores(X_test, i, before_is_correct, after_is_correct, before_queries_score, performance_history[-1],
                         budget)
 
     # Print mean and std of no-pooling accuracy scores
-    print("\nUnqueried vector data")
-    print("Mean ", round(np.average(noqueried_vector), 3))
-    print("Std ", round(np.std(noqueried_vector), 3))
+    print_mean_and_std(before_queries_scores_vector, after_queries_scores_vector)
 
-    # Print mean and std of after-pooling accuracy scores
-    print("\nQueried vector data")
-    print("Mean ", round(np.average(queried_vector), 3))
-    print("Std ", round(np.std(queried_vector), 3))
+    # Print t-test results
+    t_test(before_queries_scores_vector, after_queries_scores_vector)
 
-    np.save('queried_vector_data.npy', queried_vector)
-    np.save('no_queried_vector_data.npy', noqueried_vector)
+    # Save accuracy scores vectors
+    os.makedirs('saved_scores', exist_ok=True)
+    np.save(pathlib.Path('saved_numpy_files\\after_queries_scores_vector_data.npy'), after_queries_scores_vector)
+    np.save(pathlib.Path('saved_numpy_files\\before_queries_scores_vector_data.npy'), before_queries_scores_vector)
 
     # Plot accuracy history
     plot_accuracy(accuracy_history, choices)
     plt.show()
-
 
 def __get_n_neighbours(d, key, default=3):
     try:
