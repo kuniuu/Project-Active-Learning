@@ -2,7 +2,7 @@ import re
 
 import inquirer
 
-from methods.utilities import set_seed
+from methods.utils import set_seed
 from scripts.active_learning import run_active_learning
 
 questions = [
@@ -31,11 +31,11 @@ if choices['dataset'] == 'Synthetic dataset':
     ]
     choices['plots'] = inquirer.prompt(questions)['plots']
 
-print("Running Active Learning simulation with the following choices:")
-print("Choice of estimator: " + choices['estimator'])
-print("Choice of dataset: " + choices['dataset'])
+print("\nRunning Active Learning simulation with the following choices:")
+print("- Choice of estimator: " + choices['estimator'])
+print("- Choice of dataset: " + choices['dataset'])
 if choices['estimator'] == 'kNearestNeighbours':
-    print("Choice of n_neighbors: " + choices['n_neighbors'])
+    print("- Choice of n_neighbors: " + choices['n_neighbors'])
 
 set_seed(2137)
 

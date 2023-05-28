@@ -1,5 +1,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
+import pandas as pd
+from tabulate import tabulate
 
 
 def set_seed(seed):
@@ -36,6 +38,17 @@ def plot_accuracy(accuracy_history, choices):
         ax = plt.subplot(2, 5, i + 1)
         __scatter_accuracy(x, y, ax)
         ax.set_title(f"Fold {i + 1}")
+
+
+def print_mean_and_std(before_queries_results, after_queries_results):
+    table = [[round(np.average(before_queries_results), 3), round(np.average(after_queries_results), 3)],
+             [round(np.std(before_queries_results), 3), round(np.std(after_queries_results), 3)]]
+
+    df = pd.DataFrame(table,
+                      columns=['without AL', 'with AL'],
+                      index=['Mean', 'Std'])
+
+    print('Mean and std for scores:\n', df.to_markdown())
 
 
 def __scatter_scores(X_test, is_correct: bool, ax):

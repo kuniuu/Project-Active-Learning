@@ -37,7 +37,7 @@ def __use_real_dataset():
 
     # Load external dataset
     cwd = os.getcwd()
-    path = pathlib.Path(cwd + '\\datasets\\titanic.csv')
+    path = pathlib.Path(cwd + '\\datasets\\resources\\titanic.csv')
     data = pd.read_csv(path)
 
     # Drop the non-important features and labels
@@ -58,7 +58,7 @@ def __use_real_dataset():
     X_new = selector.fit_transform(X=X, y=y)
 
     # Save selected feature names to .npy file
-    np.save('selected_features.npy', np.array(X_columns_names)[selector.get_support()])
+    np.save(pathlib.Path('saved_numpy_files\\selected_features.npy'), np.array(X_columns_names)[selector.get_support()])
 
     # Encode the labels
     y = encoder.fit_transform(y)
