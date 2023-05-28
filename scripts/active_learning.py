@@ -112,14 +112,6 @@ def run_active_learning(choices):
                         budget)
 
     # Print mean and std of no-pooling accuracy scores
-    # print("\nUnqueried vector data")
-    # print("Mean ", round(np.average(before_queries_scores_vector), 3))
-    # print("Std ", round(np.std(before_queries_scores_vector), 3))
-    #
-    # # Print mean and std of after-pooling accuracy scores
-    # print("\nQueried vector data")
-    # print("Mean ", round(np.average(after_queries_scores_vector), 3))
-    # print("Std ", round(np.std(after_queries_scores_vector), 3))
     print_mean_and_std(before_queries_scores_vector, after_queries_scores_vector)
 
     # Print t-test results
