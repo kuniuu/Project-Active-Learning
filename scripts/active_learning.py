@@ -9,7 +9,7 @@ from datasets.dataset_creator import choose_dataset
 from methods.active_learning.estimators import choose_estimator
 # Our own least_confidence method
 from methods.active_learning.my_least_confidence import least_confidence_sampling
-from methods.utils import plot_accuracy, get_seed, save_scores_to_npy
+from methods.utils import plot_accuracy, get_seed, save_to_npy
 
 
 def run_active_learning(simulation_parameters):
@@ -30,6 +30,9 @@ def run_active_learning(simulation_parameters):
 
     # Define a list for accuracy history of each fold
     accuracy_history = []
+
+    predictions_vector = []
+    ground_truth_vector = []
 
     # Create a RepeatedStratifiedKFold loop
     for i, (train_index, test_index) in enumerate(rskf.split(X_raw, y_raw)):
@@ -97,25 +100,36 @@ def run_active_learning(simulation_parameters):
 
         # Make a prediction and check if it was correct (for scatter purposes only)
         predictions = learner.predict(X_test)
-        after_is_correct = (predictions == y_test)
 
         print("- Classification report:\n" + classification_report(y_test, predictions))
+
+        predictions_vector.append(predictions)
+        ground_truth_vector.append(y_test)
 
     # Create the directory if it doesn't exist
     directory_path_titanic = 'saved_scores_titanic'
     directory_path_synthetic = 'saved_scores_synthetic'
+    directory_path_roc_params_titanic = 'saved_roc_params_titanic'
+    directory_path_roc_params_synthetic = 'saved_roc_params_synthetic'
     os.makedirs(directory_path_titanic, exist_ok=True)
     os.makedirs(directory_path_synthetic, exist_ok=True)
+    os.makedirs(directory_path_roc_params_titanic, exist_ok=True)
+    os.makedirs(directory_path_roc_params_synthetic, exist_ok=True)
 
     # Generate the file name
-    filename = f"scores_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
+    scores_filename = f"scores_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
+    predictions_filename = f"predictions_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
+    ground_truth_filename = f"ground_truth_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
 
     if simulation_parameters['dataset'] == 'titanic':
-        save_scores_to_npy(directory_path_titanic, filename, scores_vector)
+        save_to_npy(directory_path_titanic, scores_filename, scores_vector)
+        save_to_npy(directory_path_roc_params_titanic, predictions_filename, predictions_vector)
+        save_to_npy(directory_path_roc_params_titanic, ground_truth_filename, ground_truth_vector)
     else:
-        save_scores_to_npy(directory_path_synthetic, filename, scores_vector)
+        save_to_npy(directory_path_synthetic, scores_filename, scores_vector)
+        save_to_npy(directory_path_roc_params_synthetic, predictions_filename, predictions_vector)
+        save_to_npy(directory_path_roc_params_synthetic, ground_truth_filename, ground_truth_vector)
 
-    # Plot accuracy history
     plot_accuracy(accuracy_history, simulation_parameters)
 
 def __get_n_neighbours(d, key, default=3):

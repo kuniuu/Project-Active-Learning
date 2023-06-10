@@ -40,10 +40,10 @@ def print_mean_and_std(before_queries_results, after_queries_results):
     print('Mean and std for scores:\n', df.to_markdown())
 
 
-def save_scores_to_npy(directory_path, filename, scores_vector):
+def save_to_npy(directory_path, filename, vector):
     # Save the scores vector
     file_path = pathlib.Path(directory_path) / filename
-    np.save(file_path, scores_vector)
+    np.save(file_path, vector)
 
     # Validate if the path exists
     if os.path.exists(file_path):
