@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelEncoder
 
 
 def choose_dataset(choice, random_state: int):
-    if choice == "Synthetic dataset":
+    if choice == "synthetic":
         return __use_synthetic_dataset(random_state)
     else:
         return __use_real_dataset()
@@ -58,7 +58,7 @@ def __use_real_dataset():
     X_new = selector.fit_transform(X=X, y=y)
 
     # Save selected feature names to .npy file
-    np.save(pathlib.Path('saved_numpy_files\\selected_features.npy'), np.array(X_columns_names)[selector.get_support()])
+    # np.save(pathlib.Path('saved_numpy_files\\selected_features.npy'), np.array(X_columns_names)[selector.get_support()])
 
     # Encode the labels
     y = encoder.fit_transform(y)
