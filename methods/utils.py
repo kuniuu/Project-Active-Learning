@@ -81,6 +81,7 @@ def generate_roc_curve(for_titanic=False):
         plt.title('ROC Curve for synthetic dataset')
     plt.legend(loc='lower right')
 
+
 def print_mean_and_std(before_queries_results, after_queries_results):
     table = [[round(np.average(before_queries_results), 3), round(np.average(after_queries_results), 3)],
              [round(np.std(before_queries_results), 3), round(np.std(after_queries_results), 3)]]
@@ -109,3 +110,9 @@ def __scatter_accuracy(x, y, ax):
     ax.plot(x, y)
     ax.set_xlabel('Query')
     ax.set_ylabel('Accuracy')
+
+
+def __load_result(directory_path, filename):
+    path = os.path.join(directory_path, filename)
+    data = np.load(path)
+    return data.tolist()

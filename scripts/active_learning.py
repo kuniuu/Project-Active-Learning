@@ -132,6 +132,7 @@ def run_active_learning(simulation_parameters):
 
     plot_accuracy(accuracy_history, simulation_parameters)
 
+
 def __get_n_neighbours(d, key, default=3):
     try:
         return int(d[key])

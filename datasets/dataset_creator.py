@@ -16,12 +16,12 @@ def choose_dataset(choice, random_state: int):
         return __use_real_dataset()
 
 
-# 1000 samples with 8 informative features and 2 classes (binary problem)
+# 1000 samples with 10 informative features and 2 classes (binary problem)
 def __use_synthetic_dataset(random_state: int):
     return make_classification(
         n_samples=1000,
-        n_features=8,
-        n_informative=8,
+        n_features=10,
+        n_informative=10,
         n_redundant=0,
         n_repeated=0,
         n_classes=2,
