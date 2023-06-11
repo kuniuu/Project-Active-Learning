@@ -82,15 +82,15 @@ def generate_roc_curve(for_titanic=False):
     plt.legend(loc='lower right')
 
 
-def print_mean_and_std(before_queries_results, after_queries_results):
-    table = [[round(np.average(before_queries_results), 3), round(np.average(after_queries_results), 3)],
-             [round(np.std(before_queries_results), 3), round(np.std(after_queries_results), 3)]]
+def print_mean_and_std(results):
+    table = [[round(np.average(results), 3)],
+             [round(np.std(results), 3)]]
 
     df = pd.DataFrame(table,
-                      columns=['without AL', 'with AL'],
+                      columns=['Value'],
                       index=['Mean', 'Std'])
 
-    print('Mean and std for scores:\n', df.to_markdown())
+    print('- Mean and std for scores:\n', df.to_markdown(), '\n')
 
 
 def save_to_npy(directory_path, filename, vector):

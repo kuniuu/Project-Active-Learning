@@ -9,7 +9,7 @@ from datasets.dataset_creator import choose_dataset
 from methods.active_learning.estimators import choose_estimator
 # Our own least_confidence method
 from methods.active_learning.my_least_confidence import least_confidence_sampling
-from methods.utils import plot_accuracy, get_seed, save_to_npy
+from methods.utils import plot_accuracy, get_seed, save_to_npy, print_mean_and_std
 
 
 def run_active_learning(simulation_parameters):
@@ -105,6 +105,8 @@ def run_active_learning(simulation_parameters):
 
         predictions_vector.append(predictions)
         ground_truth_vector.append(y_test)
+
+    print_mean_and_std(scores_vector)
 
     # Create the directory if it doesn't exist
     directory_path_titanic = 'saved_scores_titanic'
