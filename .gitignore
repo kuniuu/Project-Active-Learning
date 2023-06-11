@@ -3,3 +3,5 @@
 __pycache__/
 /saved_scores_titanic/
 /saved_scores_synthetic/
+/saved_roc_params_titanic/
+/saved_roc_params_synthetic/
