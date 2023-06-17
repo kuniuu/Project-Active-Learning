@@ -122,7 +122,7 @@ def plot_scores(X_test, iteration, before_is_correct: bool, after_is_correct: bo
 
 
 def plot_queried_pool(X_queried, y_queried, iteration, fold, simulation_parameters):
-    fig, ax = plt.subplots(1, 1, figsize=(8.5, 10), dpi=130)
+    fig, ax = plt.subplots(1, 1, figsize=(8, 8), dpi=130)
 
     __scatter_queries(X_queried, y_queried, iteration, ax)
     ax.set_title(
@@ -137,7 +137,10 @@ def __scatter_scores(X_test, is_correct: bool, ax):
 
 
 def __scatter_queries(X_queried, y_queried, i, ax):
-    ax.scatter(X_queried[:i, 0], y_queried[:i, 0], c='b', marker='o', label='Queried samples', alpha=8 / 10)
+    ax.scatter(X_queried[:i + 1, 0][y_queried[:i + 1]], X_queried[:i + 1, 1][y_queried[:i + 1]],
+               c='g', marker='o', label='Queried samples with 1 label', alpha=8 / 10)
+    ax.scatter(X_queried[:i + 1, 0][~y_queried[:i + 1]], X_queried[:i + 1, 1][~y_queried[:i + 1]],
+               c='r', marker='o', label='Queried samples with 0 label', alpha=8 / 10)
     ax.legend(loc='lower right')
     ax.set_xlim(-5, 5)  # Set x-axis limits to -5 and 5
     ax.set_ylim(-5, 5)  # Set y-axis limits to -5 and 5

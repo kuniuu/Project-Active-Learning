@@ -76,7 +76,7 @@ def run_active_learning(simulation_parameters):
         # Create arrays for storing queried samples and their labels only for synthetic dataset
         if simulation_parameters['dataset'] == 'synthetic':
             X_queried = np.zeros([budget, 2])
-            y_queried = np.zeros([budget, 2])
+            y_queried = np.zeros([budget])
 
         # Create a ActiveLearning loop
         for index in range(budget):
@@ -84,8 +84,8 @@ def run_active_learning(simulation_parameters):
             query_index, query_instance = learner.query(X_pool)
 
             if simulation_parameters['dataset'] == 'synthetic':
-                X_queried[index] = X_train[query_index]
-                y_queried[index] = query_instance
+                X_queried[index] = X_pool[query_index]
+                y_queried[index] = y_pool[query_index]
 
             # Teach our ActiveLearner model the record it has requested.
             X, y = X_pool[query_index], y_pool[query_index]
@@ -101,8 +101,8 @@ def run_active_learning(simulation_parameters):
             performance_history.append(queried_score)
 
             # Plot queried pool only for the first fold as an example, every 50 queries, only for synthetic dataset
-            if simulation_parameters['dataset'] == 'synthetic' and index != 0 and (index % 50 == 0 or index == budget - 1) and i == 0:
-                plot_queried_pool(X_queried, y_queried, index, i, simulation_parameters)
+            if simulation_parameters['dataset'] == 'synthetic' and (index % 50 == 0 or index == budget - 1) and i == 0:
+                plot_queried_pool(X_queried, y_queried.astype(bool), index, i, simulation_parameters)
 
         accuracy_history.append(performance_history)
 
