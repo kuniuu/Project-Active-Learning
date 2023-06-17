@@ -126,8 +126,8 @@ def plot_queried_pool(X_queried, y_queried, iteration, fold, simulation_paramete
 
     __scatter_queries(X_queried, y_queried, iteration, ax)
     ax.set_title(
-        'Queried pool, {estimator} estimator, fold {fold}, {i} queries'
-        .format(i=iteration + 1, estimator=simulation_parameters['estimator'], fold=fold + 1))
+        'Queried pool, {estimator} estimator, {dataset} dataset, fold {fold}, {i} queries'
+        .format(i=iteration + 1, estimator=simulation_parameters['estimator'], dataset=simulation_parameters['dataset'], fold=fold + 1))
 
 
 def __scatter_scores(X_test, is_correct: bool, ax):
