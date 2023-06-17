@@ -9,7 +9,7 @@ from datasets.dataset_creator import choose_dataset
 from methods.active_learning.estimators import choose_estimator
 # Our own least_confidence method
 from methods.active_learning.my_least_confidence import least_confidence_sampling
-from methods.utils import plot_accuracy, get_seed, save_to_npy, print_mean_and_std
+from methods.utils import plot_accuracy, get_seed, save_to_npy, print_mean_and_std, plot_scores, plot_queried_pool
 
 
 def run_active_learning(simulation_parameters):
@@ -62,6 +62,7 @@ def run_active_learning(simulation_parameters):
 
         # Make a prediction and check if it was correct (for scatter purposes only)
         predictions = learner.predict(X_test)
+        before_is_correct = (predictions == y_test)
 
         # Calculate and report our model's accuracy, then append it to the before_queries_scores_vector
         before_queries_score = accuracy_score(y_test, predictions)
@@ -72,10 +73,19 @@ def run_active_learning(simulation_parameters):
 
         performance_history = [before_queries_score]
 
+        # Create arrays for storing queried samples and their labels only for synthetic dataset
+        if simulation_parameters['dataset'] == 'synthetic':
+            X_queried = np.zeros([budget, 2])
+            y_queried = np.zeros([budget, 2])
+
         # Create a ActiveLearning loop
         for index in range(budget):
             # Query a pooling subset
             query_index, query_instance = learner.query(X_pool)
+
+            if simulation_parameters['dataset'] == 'synthetic':
+                X_queried[index] = X_train[query_index]
+                y_queried[index] = query_instance
 
             # Teach our ActiveLearner model the record it has requested.
             X, y = X_pool[query_index], y_pool[query_index]
@@ -90,6 +100,10 @@ def run_active_learning(simulation_parameters):
             # Save our model's performance for plotting.
             performance_history.append(queried_score)
 
+            # Plot queried pool only for the first fold as an example, every 50 queries, only for synthetic dataset
+            if simulation_parameters['dataset'] == 'synthetic' and index != 0 and (index % 50 == 0 or index == budget - 1) and i == 0:
+                plot_queried_pool(X_queried, y_queried, index, i, simulation_parameters)
+
         accuracy_history.append(performance_history)
 
         print(
@@ -100,8 +114,14 @@ def run_active_learning(simulation_parameters):
 
         # Make a prediction and check if it was correct (for scatter purposes only)
         predictions = learner.predict(X_test)
+        after_is_correct = (predictions == y_test)
 
         print("- Classification report:\n" + classification_report(y_test, predictions))
+
+        # Plot scores differences only for the first fold as an example, only for synthetic dataset
+        if simulation_parameters['dataset'] == 'synthetic' and i == 0:
+            plot_scores(X_test, i, before_is_correct, after_is_correct, before_queries_score, performance_history[-1],
+                        budget, simulation_parameters)
 
         predictions_vector.append(predictions)
         ground_truth_vector.append(y_test)
