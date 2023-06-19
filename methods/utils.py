@@ -36,41 +36,46 @@ def generate_roc_curve(for_titanic=False):
     result_list = os.listdir(directory_path)
 
     pre_ground_truth = [__load_result(directory_path, result) for result in result_list[:3]]
-    pre_predictions_results = [__load_result(directory_path, result) for result in result_list[3:]]
+    pre_supports_results = [__load_result(directory_path, result) for result in result_list[3:]]
 
     # Convert the lists to numpy arrays
-    predictions_results = np.array(pre_predictions_results)
+    supports_results = np.array(pre_supports_results)
     ground_truth = np.array(pre_ground_truth)
 
     # Calculate the ROC curve and AUC for each estimator and fold
-    all_fpr = np.zeros([3, 10, 3])
-    all_tpr = np.zeros([3, 10, 3])
+    all_fpr = [[[] for _ in range(10)] for _ in range(3)]
+    all_tpr = [[[] for _ in range(10)] for _ in range(3)]
     all_auc = np.zeros([3, 10])
 
     for i in range(3):
         for j in range(10):
-            fpr, tpr, thresholds = roc_curve(ground_truth[i, j, :], predictions_results[i, j, :])
+            fpr, tpr, thresholds = roc_curve(ground_truth[i, j, :], supports_results[i, j, :])
             roc_auc = auc(fpr, tpr)
-            all_fpr[i, j, :] = fpr
-            all_tpr[i, j, :] = tpr
+            all_fpr[i][j] = fpr
+            all_tpr[i][j] = tpr
             all_auc[i, j] = roc_auc
 
     # Calculate mean and standard deviation of FPR, TPR, and AUC
-    mean_fpr = np.mean(all_fpr, axis=1)
-    mean_tpr = np.mean(all_tpr, axis=1)
-    std_fpr = np.std(all_fpr, axis=1)
-    std_tpr = np.std(all_tpr, axis=1)
-    mean_auc = np.mean(all_auc, axis=1)
+    mean_fpr = np.linspace(0, 1, 100)
 
+    # Define the names of the estimators for legend
     estimators = ['DT', 'GNB', 'kNN']
 
-    # Plot the mean ROC curve with shaded region between standard deviation range
+    # Create a figure
     plt.figure()
 
-    # Plot the ROC curve for each estimator
+    # Loop through each classifier
     for i in range(3):
-        plt.plot(mean_fpr[i], mean_tpr[i], label=f'Mean ROC for {estimators[i]} (AUC = {mean_auc[i]:.2f})')
-        plt.fill_between(mean_fpr[i], mean_tpr[i] - std_tpr[i], mean_tpr[i] + std_tpr[i], alpha=0.2)
+        # Interpolate the true positive rates at the common set of false positive rates
+        tprs = [np.interp(mean_fpr, all_fpr[i][j], all_tpr[i][j]) for j in range(10)]
+        # Calculate the mean and standard deviation of the true positive rates
+        mean_tpr = np.mean(tprs, axis=0)
+        std_tpr = np.std(tprs, axis=0)
+        # Calculate the area under the curve
+        mean_auc = auc(mean_fpr, mean_tpr)
+        # Plot the mean ROC curve with a shaded region representing the standard deviation
+        plt.plot(mean_fpr, mean_tpr, label=f'Mean ROC for {estimators[i]} (AUC = {mean_auc:.2f})')
+        plt.fill_between(mean_fpr, mean_tpr - std_tpr, mean_tpr + std_tpr, alpha=0.2)
 
     plt.plot([0, 1], [0, 1], 'k--')
     plt.xlabel('False Positive Rate')

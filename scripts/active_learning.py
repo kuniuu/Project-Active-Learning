@@ -31,7 +31,7 @@ def run_active_learning(simulation_parameters):
     # Define a list for accuracy history of each fold
     accuracy_history = []
 
-    predictions_vector = []
+    supports_vector = []
     ground_truth_vector = []
 
     # Create a RepeatedStratifiedKFold loop
@@ -114,6 +114,7 @@ def run_active_learning(simulation_parameters):
 
         # Make a prediction and check if it was correct (for scatter purposes only)
         predictions = learner.predict(X_test)
+        probas = learner.predict_proba(X_test)[:, 1]
         after_is_correct = (predictions == y_test)
 
         print("- Classification report:\n" + classification_report(y_test, predictions))
@@ -123,7 +124,7 @@ def run_active_learning(simulation_parameters):
             plot_scores(X_test, i, before_is_correct, after_is_correct, before_queries_score, performance_history[-1],
                         budget, simulation_parameters)
 
-        predictions_vector.append(predictions)
+        supports_vector.append(probas)
         ground_truth_vector.append(y_test)
 
     print_mean_and_std(scores_vector)
@@ -140,16 +141,16 @@ def run_active_learning(simulation_parameters):
 
     # Generate the file name
     scores_filename = f"scores_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
-    predictions_filename = f"predictions_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
+    supports_filename = f"support_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
     ground_truth_filename = f"ground_truth_vector_for_{simulation_parameters['estimator']}_{simulation_parameters['dataset']}.npy"
 
     if simulation_parameters['dataset'] == 'titanic':
         save_to_npy(directory_path_titanic, scores_filename, scores_vector)
-        save_to_npy(directory_path_roc_params_titanic, predictions_filename, predictions_vector)
+        save_to_npy(directory_path_roc_params_titanic, supports_filename, supports_vector)
         save_to_npy(directory_path_roc_params_titanic, ground_truth_filename, ground_truth_vector)
     else:
         save_to_npy(directory_path_synthetic, scores_filename, scores_vector)
-        save_to_npy(directory_path_roc_params_synthetic, predictions_filename, predictions_vector)
+        save_to_npy(directory_path_roc_params_synthetic, supports_filename, supports_vector)
         save_to_npy(directory_path_roc_params_synthetic, ground_truth_filename, ground_truth_vector)
 
     plot_accuracy(accuracy_history, simulation_parameters)
