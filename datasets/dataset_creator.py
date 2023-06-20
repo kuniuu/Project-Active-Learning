@@ -20,8 +20,8 @@ def choose_dataset(choice, random_state: int):
 def __use_synthetic_dataset(random_state: int):
     return make_classification(
         n_samples=1000,
-        n_features=10,
-        n_informative=10,
+        n_features=2,
+        n_informative=2,
         n_redundant=0,
         n_repeated=0,
         n_classes=2,
