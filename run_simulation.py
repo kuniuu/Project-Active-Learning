@@ -10,11 +10,12 @@ set_seed(2137)
 
 for estimator in ESTIMATORS:
     run_active_learning(estimator)
+# run_active_learning(ESTIMATORS[7])
 
-t_test()
-t_test(for_titanic=True)
-
-generate_roc_curve()
-generate_roc_curve(for_titanic=True)
+# t_test()
+# t_test(for_titanic=True)
+#
+# generate_roc_curve()
+# generate_roc_curve(for_titanic=True)
 
 plt.show()

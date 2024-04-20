@@ -30,10 +30,21 @@ DECISION_TREE_TITANIC = {
     "dataset": "titanic"
 }
 
-ESTIMATORS = [GAUSSIANNB_SYNTHETIC,
-              GAUSSIANNB_TITANIC,
-              KNN_SYNTHETIC,
-              KNN_TITANIC,
-              DECISION_TREE_SYNTHETIC,
-              DECISION_TREE_TITANIC]
+NEURAL_NETWORK_SYNTHETIC = {
+    "estimator": "NeuralNetwork",
+    "dataset": "synthetic"
+}
 
+NEURAL_NETWORK_TITANIC = {
+    "estimator": "NeuralNetwork",
+    "dataset": "titanic"
+}
+
+ESTIMATORS = [KNN_TITANIC,
+              # GAUSSIANNB_TITANIC,
+              # KNN_SYNTHETIC,
+              # GAUSSIANNB_SYNTHETIC,
+              # DECISION_TREE_SYNTHETIC,
+              # DECISION_TREE_TITANIC,
+              # NEURAL_NETWORK_SYNTHETIC,
+              NEURAL_NETWORK_TITANIC]

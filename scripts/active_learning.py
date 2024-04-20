@@ -1,6 +1,7 @@
 import os
 
 import numpy as np
+from modAL.uncertainty import uncertainty_sampling
 from modAL.models import ActiveLearner
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import RepeatedStratifiedKFold
@@ -42,7 +43,7 @@ def run_active_learning(simulation_parameters):
 
         # Find 5 random indexes for new ground true train subset
         n_labeled_examples = X_train.shape[0]
-        training_indices = np.random.randint(low=0, high=n_labeled_examples, size=50)
+        training_indices = np.random.randint(low=0, high=n_labeled_examples, size=200)
 
         # From train set, create a new ground true train subset
         X_train_new = X_train[training_indices]
@@ -104,6 +105,8 @@ def run_active_learning(simulation_parameters):
             if simulation_parameters['dataset'] == 'synthetic' and (index % 50 == 0 or index == budget - 1) and i == 0:
                 plot_queried_pool(X_queried, y_queried.astype(bool), index, i, simulation_parameters)
 
+        print(learner.score(X_test, y_test))
+
         accuracy_history.append(performance_history)
 
         print(
@@ -114,7 +117,8 @@ def run_active_learning(simulation_parameters):
 
         # Make a prediction and check if it was correct (for scatter purposes only)
         predictions = learner.predict(X_test)
-        probas = learner.predict_proba(X_test)[:, 1]
+        # test=learner.predict_proba(X_test) # dupa
+        # probas = learner.predict_proba(X_test)[:, 1] # dupa
         after_is_correct = (predictions == y_test)
 
         print("- Classification report:\n" + classification_report(y_test, predictions))
@@ -124,7 +128,7 @@ def run_active_learning(simulation_parameters):
             plot_scores(X_test, i, before_is_correct, after_is_correct, before_queries_score, performance_history[-1],
                         budget, simulation_parameters)
 
-        supports_vector.append(probas)
+        # supports_vector.append(probas) # dupa
         ground_truth_vector.append(y_test)
 
     print_mean_and_std(scores_vector)
@@ -146,12 +150,12 @@ def run_active_learning(simulation_parameters):
 
     if simulation_parameters['dataset'] == 'titanic':
         save_to_npy(directory_path_titanic, scores_filename, scores_vector)
-        save_to_npy(directory_path_roc_params_titanic, supports_filename, supports_vector)
-        save_to_npy(directory_path_roc_params_titanic, ground_truth_filename, ground_truth_vector)
+        # save_to_npy(directory_path_roc_params_titanic, supports_filename, supports_vector) # dupa
+        # save_to_npy(directory_path_roc_params_titanic, ground_truth_filename, ground_truth_vector) # dupa
     else:
         save_to_npy(directory_path_synthetic, scores_filename, scores_vector)
-        save_to_npy(directory_path_roc_params_synthetic, supports_filename, supports_vector)
-        save_to_npy(directory_path_roc_params_synthetic, ground_truth_filename, ground_truth_vector)
+        # save_to_npy(directory_path_roc_params_synthetic, supports_filename, supports_vector) # dupa
+        # save_to_npy(directory_path_roc_params_synthetic, ground_truth_filename, ground_truth_vector) # dupa
 
     plot_accuracy(accuracy_history, simulation_parameters)
 

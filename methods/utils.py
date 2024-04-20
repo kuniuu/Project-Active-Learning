@@ -2,6 +2,7 @@ import os
 import pathlib
 import sys
 
+from keras.utils import set_random_seed
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -11,6 +12,10 @@ from tabulate import tabulate
 
 def set_seed(seed):
     np.random.seed(seed)
+
+
+def set_keras_seed(seed):
+    set_random_seed(seed)
 
 
 def get_seed():
